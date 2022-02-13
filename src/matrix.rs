@@ -5,16 +5,16 @@ pub fn matrix(row: usize, col: usize) -> Vec<Vec<i32>> {
   return vec![vec![0i32; col]; row];
 }
 
-pub fn auto_fill_matrix(v: &mut Vec<Vec<i32>>) {
-  for i in 0..v.len() {
-    for j in 0..v[i].len() {
-      v[i][j] = rand::thread_rng().gen_range(0..10);
+pub fn auto_fill_matrix(mtrx: &mut Vec<Vec<i32>>) {
+  for i in 0..mtrx.len() {
+    for j in 0..mtrx[i].len() {
+      mtrx[i][j] = rand::thread_rng().gen_range(0..10);
     }
   }
 }
 
-pub fn man_fill_matrix(v: &mut Vec<Vec<i32>>) {
-  for i in 0..v.len() {
+pub fn man_fill_matrix(mtrx: &mut Vec<Vec<i32>>) {
+  for i in 0..mtrx.len() {
     let mut s = String::new();
     io::stdin().read_line(&mut s).expect("Failed to read line");
 
@@ -23,14 +23,14 @@ pub fn man_fill_matrix(v: &mut Vec<Vec<i32>>) {
       .map(|x| x.parse::<i32>())
       .collect::<Result<Vec<i32>, _>>()
       .unwrap();
-    for j in 0..v[i].len() {
-      v[i][j] = result[j];
+    for j in 0..mtrx[i].len() {
+      mtrx[i][j] = result[j];
     }
   }
 }
 
-pub fn print_matrix(v: &mut Vec<Vec<i32>>) {
-  for row in v {
+pub fn print_matrix(mtrx: &mut Vec<Vec<i32>>) {
+  for row in mtrx {
     for &mut elem in row {
       print!("{} ", elem)
     }
@@ -39,22 +39,27 @@ pub fn print_matrix(v: &mut Vec<Vec<i32>>) {
   println!();
 }
 
-pub fn clear_matrix(v: &mut Vec<Vec<i32>>) {
-  for i in 0..v.len() {
-    v[i].clear();
+pub fn clear_matrix(mtrx: &mut Vec<Vec<i32>>) {
+  for i in 0..mtrx.len() {
+    mtrx[i].clear();
   }
-  v.clear();
+  mtrx.clear();
 }
 
 pub fn copy_values(mat1: &mut Vec<Vec<i32>>, mat2: &mut Vec<Vec<i32>>) {
-  let len = if mat1.len() > mat2.len() {
+  let rows = if mat1.len() > mat2.len() {
     mat2.len()
   } else {
     mat1.len()
   };
+  let cols = if mat1[0].len() > mat2[0].len() {
+    mat2[0].len()
+  } else {
+    mat1[0].len()
+  };
 
-  for i in 0..len {
-    for j in 0..len {
+  for i in 0..rows {
+    for j in 0..cols {
       mat2[i][j] = mat1[i][j];
     }
   }
@@ -63,38 +68,38 @@ pub fn copy_values(mat1: &mut Vec<Vec<i32>>, mat2: &mut Vec<Vec<i32>>) {
 pub fn sub_matrices(
   mat1: &mut Vec<Vec<i32>>,
   mat2: &mut Vec<Vec<i32>>,
-  l: usize,
+  aug_size: usize,
 ) -> Vec<Vec<Vec<i32>>> {
-  let mut ve = vec![matrix(l, l); 8];
-  for i in 0..l {
-    for j in 0..l {
-      ve[0][i][j] = mat1[i][j];
-      ve[4][i][j] = mat2[i][j];
+  let mut ang_mtrx = vec![matrix(aug_size, aug_size); 8];
+  for i in 0..aug_size {
+    for j in 0..aug_size {
+      ang_mtrx[0][i][j] = mat1[i][j];
+      ang_mtrx[4][i][j] = mat2[i][j];
       //
-      ve[1][i][j] = mat1[i][j + l];
-      ve[5][i][j] = mat2[i][j + l];
+      ang_mtrx[1][i][j] = mat1[i][j + aug_size];
+      ang_mtrx[5][i][j] = mat2[i][j + aug_size];
       //
-      ve[2][i][j] = mat1[i + l][j];
-      ve[6][i][j] = mat2[i + l][j];
+      ang_mtrx[2][i][j] = mat1[i + aug_size][j];
+      ang_mtrx[6][i][j] = mat2[i + aug_size][j];
       //
-      ve[3][i][j] = mat1[i + l][j + l];
-      ve[7][i][j] = mat2[i + l][j + l];
+      ang_mtrx[3][i][j] = mat1[i + aug_size][j + aug_size];
+      ang_mtrx[7][i][j] = mat2[i + aug_size][j + aug_size];
     }
   }
-  return ve;
+  return ang_mtrx;
 }
 
-pub fn declare_intermediate_matrices(l: usize) -> Vec<Vec<Vec<i32>>> {
-  return vec![matrix(l, l); 7];
+pub fn declare_intermediate_matrices(aug_size: usize) -> Vec<Vec<Vec<i32>>> {
+  return vec![matrix(aug_size, aug_size); 7];
 }
 
-pub fn calc_interm(mat: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i32>>>, l: usize) {
-  for i in 0..l {
-    for j in 0..l {
-      for z in 0..l {
+pub fn calc_interm(mat: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i32>>>, aug_size: usize) {
+  for i in 0..aug_size {
+    for j in 0..aug_size {
+      for z in 0..aug_size {
         interm[z][i][j] = 0;
       }
-      for z in 0..l {
+      for z in 0..aug_size {
         interm[0][i][j] += (mat[0][i][z] + mat[3][i][z]) * (mat[4][z][j] + mat[7][z][j]);
         interm[1][i][j] += (mat[2][i][z] + mat[3][i][z]) * mat[4][z][j];
         interm[2][i][j] += mat[0][i][z] * (mat[5][z][j] - mat[7][z][j]);
@@ -107,9 +112,9 @@ pub fn calc_interm(mat: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i32>>>
   }
 }
 
-pub fn calc_helpers(helpers: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i32>>>, l: usize) {
-  for i in 0..l {
-    for j in 0..l {
+pub fn calc_helpers(helpers: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i32>>>, aug_size: usize) {
+  for i in 0..aug_size {
+    for j in 0..aug_size {
       helpers[0][i][j] = interm[0][i][j] + interm[3][i][j] - interm[4][i][j] + interm[6][i][j];
       helpers[1][i][j] = interm[2][i][j] + interm[4][i][j];
       helpers[2][i][j] = interm[1][i][j] + interm[3][i][j];
@@ -121,40 +126,42 @@ pub fn calc_helpers(helpers: &mut Vec<Vec<Vec<i32>>>, interm: &mut Vec<Vec<Vec<i
 pub fn copy_helpers_to_result(
   helpers: &mut Vec<Vec<Vec<i32>>>,
   result: &mut Vec<Vec<i32>>,
-  l: usize,
+  aug_size: usize,
 ) {
-  for i in 0..l {
-    for j in 0..l {
+  for i in 0..aug_size {
+    for j in 0..aug_size {
       result[i][j] = helpers[0][i][j];
-      result[i][j + l] = helpers[1][i][j];
-      result[i + l][j] = helpers[2][i][j];
-      result[i + l][j + l] = helpers[3][i][j];
+      result[i][j + aug_size] = helpers[1][i][j];
+      result[i + aug_size][j] = helpers[2][i][j];
+      result[i + aug_size][j + aug_size] = helpers[3][i][j];
     }
   }
 }
 
-pub fn matrix_bounds(mat: &mut Vec<Vec<i32>>, l: usize) -> (usize, usize) {
-  let (mut x1, mut x2, mut f, mut s) = (0, 0, 100, 100);
+pub fn matrix_bounds(mat: &mut Vec<Vec<i32>>, aug_size: usize) -> (usize, usize) {
+  let mut num_rows;
+  let mut num_cols;
+  let (mut bot_border, mut right_border) = (aug_size, aug_size);
 
-  for i in 0..l {
-    x1 = 0;
-    x2 = 0;
-    for j in 0..l {
+  for i in 0..aug_size {
+    num_rows = 0;
+    num_cols = 0;
+    for j in 0..aug_size {
       if mat[i][j] != 0 {
-        x1 += 1;
-        f = 100;
+        num_rows += 1;
+        bot_border = 100;
       }
       if mat[j][i] != 0 {
-        x2 += 1;
-        s = 100;
+        num_cols += 1;
+        right_border = 100;
       }
     }
-    if x1 == 0 && i < f {
-      f = i;
+    if num_rows == 0 && i < bot_border {
+      bot_border = i;
     }
-    if x2 == 0 && i < s {
-      s = i;
+    if num_cols == 0 && i < right_border {
+      right_border = i;
     }
   }
-  return (f, s);
+  return (bot_border, right_border);
 }

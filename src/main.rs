@@ -14,8 +14,8 @@ fn main() {
   let (row1, col1) = input_size();
   println!("Введите размеры второй матрицы\t");
   let (row2, col2) = input_size();
-  let mut m1 = matrix(row1, col1);
-  let mut m2 = matrix(row2, col2);
+  let mut mtrx1 = matrix(row1, col1);
+  let mut mtrx2 = matrix(row2, col2);
 
   ///////////////////////////////////////////////////////////////////////////////
   ////////////////Выбор способа заполнения и заполнение матриц///////////////////
@@ -23,76 +23,76 @@ fn main() {
 
   match select_way() {
     Fill::Manually => {
-      man_fill_matrix(&mut m1);
+      man_fill_matrix(&mut mtrx1);
       println!("\n");
-      man_fill_matrix(&mut m2);
+      man_fill_matrix(&mut mtrx2);
       println!("\nМатрица 1\n");
-      print_matrix(&mut m1);
+      print_matrix(&mut mtrx1);
       println!("\nМатрица 2\n");
-      print_matrix(&mut m2);
+      print_matrix(&mut mtrx2);
     }
     Fill::Auto => {
-      auto_fill_matrix(&mut m1);
-      auto_fill_matrix(&mut m2);
+      auto_fill_matrix(&mut mtrx1);
+      auto_fill_matrix(&mut mtrx2);
       println!("\nМатрица 1\n");
-      print_matrix(&mut m1);
+      print_matrix(&mut mtrx1);
       println!("\nМатрица 2\n");
-      print_matrix(&mut m2);
+      print_matrix(&mut mtrx2);
     }
   }
   ///////////////////////////////////////////////////////////////////////////////
   /////////////////Приведение матриц к требуемому размеру////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  let mut l = 2;
-  while l < row1 || l < row2 || l < col1 || l < col2 {
-    l *= 2;
+  let mut aug_size = 2;
+  while aug_size < row1 || aug_size < row2 || aug_size < col1 || aug_size < col2 {
+    aug_size *= 2;
   }
 
-  let mut m3 = matrix(l, l);
-  let mut m4 = matrix(l, l);
+  let mut aug_mtrx1 = matrix(aug_size, aug_size);
+  let mut aug_mtrx2 = matrix(aug_size, aug_size);
 
-  copy_values(&mut m1, &mut m3);
-  copy_values(&mut m2, &mut m4);
+  copy_values(&mut mtrx1, &mut aug_mtrx1);
+  copy_values(&mut mtrx2, &mut aug_mtrx2);
 
-  clear_matrix(&mut m1);
-  clear_matrix(&mut m2);
+  clear_matrix(&mut mtrx1);
+  clear_matrix(&mut mtrx2);
 
   println!("Приведенные матрицы");
   println!("\nМатрица 1\n");
-  print_matrix(&mut m3);
+  print_matrix(&mut aug_mtrx1);
   println!("\nМатрица 2\n");
-  print_matrix(&mut m4);
+  print_matrix(&mut aug_mtrx2);
 
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////Разбиение матриц на подматрицы и их заполнение//////////////////
   ///////////////////////////////////////////////////////////////////////////////
-  let mut sub_matr = sub_matrices(&mut m3, &mut m4, l / 2);
+  let mut sub_matr = sub_matrices(&mut aug_mtrx1, &mut aug_mtrx2, aug_size / 2);
 
-  clear_matrix(&mut m3);
-  clear_matrix(&mut m4);
+  clear_matrix(&mut aug_mtrx1);
+  clear_matrix(&mut aug_mtrx2);
   ///////////////////////////////////////////////////////////////////////////////
   ////////////////////////Создание промежуточных матриц//////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  let mut interm = declare_intermediate_matrices(l / 2);
+  let mut interm = declare_intermediate_matrices(aug_size / 2);
 
   ///////////////////////////////////////////////////////////////////////////////
   ////////////////////Вычисление значений промежуточных матриц///////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  calc_interm(&mut sub_matr, &mut interm, l / 2);
+  calc_interm(&mut sub_matr, &mut interm, aug_size / 2);
 
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////Создание вспомогательных матриц/////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
-  let mut helpers = vec![matrix(l / 2, l / 2); 4];
+  let mut helpers = vec![matrix(aug_size / 2, aug_size / 2); 4];
 
   ///////////////////////////////////////////////////////////////////////////////
   ////////////Подсчет значений вспомогательных матриц из промежуточных///////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  calc_helpers(&mut helpers, &mut interm, l / 2);
+  calc_helpers(&mut helpers, &mut interm, aug_size / 2);
 
   for mut i in &mut interm {
     clear_matrix(&mut i);
@@ -102,12 +102,12 @@ fn main() {
   ///////////////////Создание результирующей матрицы/////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  let mut m5 = matrix(l, l);
+  let mut aug_res_mtrx = matrix(aug_size, aug_size);
 
   ///////////////////////////////////////////////////////////////////////////////
   ///////Занесение информации из вспомогательных матриц в результирующую/////////
   ///////////////////////////////////////////////////////////////////////////////
-  copy_helpers_to_result(&mut helpers, &mut m5, l / 2);
+  copy_helpers_to_result(&mut helpers, &mut aug_res_mtrx, aug_size / 2);
 
   for mut i in &mut helpers {
     clear_matrix(&mut i);
@@ -117,15 +117,15 @@ fn main() {
   ////////////////Выравнивание границ результирующей матрицы/////////////////////
   ///////////////////////////////////////////////////////////////////////////////
 
-  let (row, col) = matrix_bounds(&mut m5, l);
-  let mut m6 = matrix(row, col);
+  let (row, col) = matrix_bounds(&mut aug_res_mtrx, aug_size);
+  let mut res_mtrx = matrix(row, col);
 
-  copy_values(&mut m5, &mut m6);
+  copy_values(&mut aug_res_mtrx, &mut res_mtrx);
 
-  clear_matrix(&mut m5);
+  clear_matrix(&mut aug_res_mtrx);
   println!("Результирующая матрица");
 
-  print_matrix(&mut m6);
+  print_matrix(&mut res_mtrx);
 
-  clear_matrix(&mut m6);
+  clear_matrix(&mut res_mtrx);
 }
